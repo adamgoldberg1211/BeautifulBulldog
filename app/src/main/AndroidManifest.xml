@@ -16,7 +16,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".BulldogListActivity"></activity>
+        <activity android:name=".BulldogListActivity" />
+        <activity android:name=".BulldogActivity"></activity>
     </application>
 
 </manifest>
