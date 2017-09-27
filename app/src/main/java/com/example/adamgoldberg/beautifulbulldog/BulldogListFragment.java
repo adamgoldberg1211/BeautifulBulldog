@@ -3,6 +3,7 @@ package com.example.adamgoldberg.beautifulbulldog;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.BoolRes;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +11,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+
 import io.realm.Realm;
+import io.realm.RealmResults;
 
 
 /**
@@ -18,6 +22,7 @@ import io.realm.Realm;
  */
 public class BulldogListFragment extends Fragment {
     private ListView bulldogList;
+    private MainActivity mainActivity;
 
     public BulldogListFragment() {
         // Required empty public constructor
@@ -31,9 +36,9 @@ public class BulldogListFragment extends Fragment {
 
         bulldogList = (ListView) view.findViewById(R.id.bulldog_list);
 
-        MainActivity mainActivity = (MainActivity) this.getActivity();
+        mainActivity = (MainActivity) this.getActivity();
 
-        BulldogArrayAdapter adapter = new BulldogArrayAdapter(this.getActivity(), mainActivity.realm.where(Bulldog.class).findAll());
+        BulldogArrayAdapter adapter = new BulldogArrayAdapter(this.getActivity(), this.getAvailableBulldogs());
         bulldogList.setAdapter(adapter);
 
         bulldogList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
@@ -42,11 +47,41 @@ public class BulldogListFragment extends Fragment {
                 final Bulldog bulldog = (Bulldog) adapterView.getItemAtPosition(i);
                 Intent intent = new Intent(view.getContext(), BulldogActivity.class);
                 intent.putExtra("bulldog", bulldog.getId());
+                intent.putExtra("username", mainActivity.user.getUsername());
                 startActivity(intent);
             }
         });
 
         return view;
     }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        BulldogArrayAdapter adapter = new BulldogArrayAdapter(this.getActivity(), this.getAvailableBulldogs());
+        bulldogList.setAdapter(adapter);
+    }
+
+    public ArrayList<Bulldog> getAvailableBulldogs() {
+        ArrayList<Bulldog> bulldogs2 = new ArrayList<Bulldog>();
+
+        RealmResults<Bulldog> bulldogs = mainActivity.realm.where(Bulldog.class).findAll();
+        for (Bulldog bulldog:bulldogs){
+            Boolean isPresent = false;
+            for(Vote vote : bulldog.getVotes()){
+                if(vote.getOwner().getUsername().equals(mainActivity.user.getUsername())){
+                    isPresent = true;
+                }
+            }
+            if(!isPresent){
+                bulldogs2.add(bulldog);
+            }
+        }
+
+        return bulldogs2;
+    }
+
+
 
 }

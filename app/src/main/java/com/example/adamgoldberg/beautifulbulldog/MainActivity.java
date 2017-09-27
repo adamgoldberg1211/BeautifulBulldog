@@ -15,6 +15,7 @@ import io.realm.Realm;
 public class MainActivity extends AppCompatActivity{
 
     public Realm realm;
+    public User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -24,6 +25,8 @@ public class MainActivity extends AppCompatActivity{
         setSupportActionBar(toolbar);
 
         realm = Realm.getDefaultInstance();
+        user = realm.where(User.class).equalTo("username", getIntent().getStringExtra("username")).findFirst();
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener(){
