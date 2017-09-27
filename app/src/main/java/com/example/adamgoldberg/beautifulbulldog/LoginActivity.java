@@ -19,6 +19,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button loginButton;
     private EditText emailField;
     private EditText passwordField;
+    private Realm realm;
 
 
     @Override
@@ -35,17 +36,21 @@ public class LoginActivity extends AppCompatActivity {
                 login("cs188", "MyBeautifulBulldogApp", emailField.getText().toString());
             }
         });
+
     }
 
     private void login(final String email, final String password, final String username) {
         if(SyncUser.currentUser()!= null) {
-            SyncUser.currentUser().logout();
 
             Realm realm = Realm.getDefaultInstance();
             if(realm != null) {
                 realm.close();
                 Realm.deleteRealm(realm.getConfiguration());
+
+                SyncUser.currentUser().logout();
             }
+
+
         }
         SyncCredentials myCredentials = SyncCredentials.usernamePassword(email, password, false);
         SyncUser.loginAsync(myCredentials, "http://52.205.194.154:9080", new SyncUser.Callback() {
@@ -53,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onSuccess(SyncUser user) {
                 SyncConfiguration configuration = new SyncConfiguration
                         .Builder(user, "realm://52.205.194.154:9080/~/bulldog")
-                        .disableSSLVerification().waitForInitialRemoteData().schemaVersion((long) 11.0).build();
+                        .disableSSLVerification().waitForInitialRemoteData().schemaVersion((long) 12.0).build();
                 Realm.setDefaultConfiguration(configuration);
 
                 Realm.getInstanceAsync(configuration, new Realm.Callback() {
@@ -73,6 +78,7 @@ public class LoginActivity extends AppCompatActivity {
                         realm.close();
 
                         Intent intent = new Intent(getBaseContext(), MainActivity.class);
+                        intent.putExtra("username", username);
                         startActivity(intent);
                     }
                 });
